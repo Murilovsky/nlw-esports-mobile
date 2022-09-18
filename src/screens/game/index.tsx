@@ -10,6 +10,7 @@ import { THEME } from '../../theme';
 import logoImg from '../../assets/logo-nlw-esports.png'
 import { Heading } from '../../components/heading';
 import { DuoCard, DuoCardProps } from '../../components/anuncio';
+import { DuoMatch } from '../../components/duomatch';
 
 export function Game() {
 
@@ -17,6 +18,7 @@ export function Game() {
     const game = route.params as GameParams
 
     const [ads, setAds] = useState<Array<DuoCardProps>>([])
+    const [selected, setSelected] = useState<string>('')
 
     const navigation = useNavigation()
 
@@ -26,6 +28,12 @@ export function Game() {
             .then(data => setAds(data))
 
     }, [])
+
+    async function GetDiscord(adsId: string) {
+        fetch(`http://192.168.1.181:3000/ads/${adsId}/discord`)
+            .then(res => res.json())
+            .then(data => setSelected(data.discord))
+    }
 
     function Back() {
         navigation.goBack()
@@ -46,12 +54,13 @@ export function Game() {
                 <FlatList
                     data={ads}
                     keyExtractor={item => item.id}
-                    renderItem={({ item }) => <DuoCard onConnect={() => { }} data={item} />}
+                    renderItem={({ item }) => <DuoCard onConnect={() => GetDiscord(item.id)} data={item} />}
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     style={styles.containerList}
                     contentContainerStyle={ads.length > 0 ? styles.contentList : styles.emptyContentList}
                     ListEmptyComponent={() => (<Text style={styles.emptyText}>Ainda não há anúncios para esse jogo 😢</Text>)} />
+                <DuoMatch visible={selected.length > 0} discord={selected} close={() => setSelected('')} />
             </SafeAreaView>
         </Background>
 
